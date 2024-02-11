@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "rinha-de-backend-2024-q1-flask"
+version = "0.1.0"
+description = ""
+authors = ["devbrunorm <devbrunorm@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+flask = "^3.0.2"
+psycopg2 = "^2.9.9"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
