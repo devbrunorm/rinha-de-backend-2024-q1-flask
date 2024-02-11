@@ -49,11 +49,16 @@ BEGIN
     FROM clientes
     WHERE id = NEW.cliente_id;
 
-    IF NEW.tipo = CAST(0 AS BIT)  AND (saldo_atual_cliente - NEW.valor) < (limite_cliente * -1) THEN
-        RAISE EXCEPTION 'Saldo menor que seu limite';
-    ELSE
-        RETURN NEW;
+    IF 
+        NEW.tipo = B'0' 
+            AND 
+        (saldo_atual_cliente - NEW.valor) < (limite_cliente * -1) 
+    THEN
+        RAISE EXCEPTION 'Saldo inferior ao limite';
     END IF;
+
+    RETURN NEW;
+
 END;
 $$ LANGUAGE plpgsql;
 
@@ -66,13 +71,13 @@ BEGIN
     SELECT
         COALESCE(SUM(valor), 0) INTO total_creditos
     FROM transacoes
-    WHERE tipo = CAST(1 AS BIT)
+    WHERE tipo = B'1'
         AND cliente_id = NEW.cliente_id;
 
     SELECT 
         COALESCE(SUM(valor), 0) INTO total_debitos
     FROM transacoes
-    WHERE tipo = CAST(0 AS BIT)
+    WHERE tipo = B'0'
          AND cliente_id = NEW.cliente_id;
 
     UPDATE clientes
@@ -82,6 +87,11 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_transacao
+BEFORE INSERT ON transacoes
+FOR EACH ROW
+EXECUTE FUNCTION validar_transacao();
 
 CREATE TRIGGER after_insert_transacao
 AFTER INSERT ON transacoes
